@@ -1,25 +1,24 @@
 package validate.password.password;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 
-import java.util.Scanner;
 
-public class ValidatePasswordNumber {
+public class ValidatePasswordNumber extends AbstractVerticle {
 
-    public static void main(String[] args) {
-        Vertx vertx = Vertx.vertx();
-    new LowerUpperCase(vertx); // Initialize LowerUpperCase class
 
-    Scanner scanner = new Scanner(System.in);
-    System.out.println("Enter password: ");
-    String password = scanner.nextLine();
-    System.out.println("Password is: " + password);
-    int passwordLength = password.length();
-    if (passwordLength >= 8) {
-      System.out.println("Password is valid for length");
-      vertx.eventBus().send("password.validate", password);
-    } else {
-      System.out.println("Password must be at least 8 characters long");
-    }
+  @Override
+  public void start(Promise<Void> startPromise) throws Exception {
+    startPromise.complete();
+    vertx.eventBus().consumer("password.validate.count", message -> {
+      String password = message.body().toString();
+      if (password.length() >= 8) {
+        System.out.println("Password is valid for number");
+        vertx.eventBus().send("password.validate.lowerUpperCase", password );
+      } else {
+        vertx.eventBus().send("countError" , "Password must contain at least 8 numbers") ;
+      }
+    });
   }
 }
